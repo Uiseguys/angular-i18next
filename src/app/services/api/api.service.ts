@@ -1,13 +1,13 @@
 /**
  * Created by Tall Prince on 5/26/2017.
  */
-import {Injectable} from '@angular/core';
-import {Http, Headers, URLSearchParams } from '@angular/http';
-import {Observable} from "rxjs";
-import {Router} from "@angular/router";
+import { Injectable } from '@angular/core';
+import { Http, Headers, URLSearchParams } from '@angular/http';
+import { Observable } from "rxjs";
+import { Router } from "@angular/router";
 
-import {environment as ENV} from "../../../environments/environment";
-import {SettingsService} from "../settings/settings.service";
+import { environment as ENV } from "../../../environments/environment";
+import { SettingsService } from "../settings/settings.service";
 
 @Injectable()
 export class Api {
@@ -77,10 +77,10 @@ export class Api {
         }).map(res => res.json()).catch(this.handleError);
     }
 
-    private handleError (error: any) {
-        if((error.status == 401 || error.status == 400) && error.url && !error.url.endsWith('/login')) {
+    private handleError(error: any) {
+        if ((error.status == 401 || error.status == 400) && error.url && !error.url.endsWith('/login')) {
             if (this.settings) this.settings.clearSetting();
-            document.location.href="/";
+            document.location.href = "/";
         }
         // In a real world app, you might use a remote logging infrastructure
 

@@ -2,18 +2,19 @@
  * Created by S.Angel on 4/2/2017.
  */
 import { Injectable } from '@angular/core';
-import {Api} from "services/api/api.service";
+import { Api } from "services/api/api.service";
 
 @Injectable()
 export class TranslationService {
     constructor(
-      private api: Api,
+        private api: Api,
     ) {
 
     }
 
     getDetail(language, namespace, projectId = 1) {
         const filter = {
+            include: ['project'],
             where: {
                 projectId,
                 language,
@@ -26,7 +27,7 @@ export class TranslationService {
 
     getLanguages(namespace, projectId = 1) {
         const filter = {
-            fields: {language: true},
+            fields: { language: true },
             where: {
                 projectId,
                 namespace,
@@ -50,5 +51,5 @@ export class TranslationService {
 
     updateKey(translationId, detail) {
         return this.api.patch(`/Translations/${translationId}/key`, detail);
-    }    
+    }
 }
