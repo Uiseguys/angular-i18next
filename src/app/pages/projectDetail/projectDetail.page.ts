@@ -7,16 +7,16 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { groupBy } from 'lodash';
 
-import { ProjectService } from "./project.service";
+import { ProjectDetailService } from "./projectDetail.service";
 import languageList from './languages';
 
 @Component({
-    selector: 'app-project-page',
-    templateUrl: './project.page.html',
-    styleUrls: ['./project.page.scss'],
+    selector: 'app-projectDetail-page',
+    templateUrl: './projectDetail.page.html',
+    styleUrls: ['./projectDetail.page.scss'],
     encapsulation: ViewEncapsulation.None,
 })
-export class ProjectPage implements OnInit {
+export class ProjectDetailPage implements OnInit {
 
     languages = [];
     detail = {};
@@ -32,11 +32,13 @@ export class ProjectPage implements OnInit {
     versionForm;
     versionModalRef;
 
+    project: any = {};
+
     constructor(
         private fb: FormBuilder,
         private route: ActivatedRoute,
         public router: Router,
-        private api: ProjectService,
+        private api: ProjectDetailService,
         private toasterService: ToasterService,
         private modalService: BsModalService,
     ) {
@@ -59,14 +61,21 @@ export class ProjectPage implements OnInit {
     }
 
     ngOnInit() {
-        this.api.getDetail().subscribe(res => {
-            this.detail = groupBy(res, item => item.language);
-            this.languages = Object.keys(this.detail);
-        });
+        this.route.data.subscribe(({ project }) => {
+            this.project = project;
 
-        this.api.getVersions().subscribe(res => {
-            this.versions = res.length ? res : ['Latest'];
-        });
+            this.api.getDetail(this.project.id).subscribe(res => {
+                this.detail = groupBy(res, item => item.language);
+                this.languages = Object.keys(this.detail);
+            });
+
+            this.api.getVersions(this.project.id).subscribe(res => {
+                this.versions = res;
+                if (!res.length || res.indexOf('Latest') === -1) {
+                    this.versions.unshift('Latest');
+                }
+            });
+        })
     }
 
     showLanguageForm(template) {
@@ -89,7 +98,7 @@ export class ProjectPage implements OnInit {
             return;
         }
 
-        this.api.addLanguage(language).subscribe(res => {
+        this.api.addLanguage(language, this.project.id).subscribe(res => {
             // add keys
             this.detail[language] = res;
             this.languages.push(language);
@@ -103,7 +112,7 @@ export class ProjectPage implements OnInit {
     }
 
     editLanguage(language, namespace) {
-        this.router.navigate(['/dashboard/translation', language, namespace]);
+        this.router.navigate(['./', language, namespace], { relativeTo: this.route });
     }
 
     showNamespaceForm(template) {
@@ -121,7 +130,7 @@ export class ProjectPage implements OnInit {
 
         // check duplicate
         const { namespace } = this.namespaceForm.value;
-        this.api.addNamespace(namespace).subscribe(res => {
+        this.api.addNamespace(namespace, this.project.id).subscribe(res => {
             // add new namespaces for all languages
             this.languages.forEach((language) => {
                 this.detail[language].push({
@@ -144,8 +153,8 @@ export class ProjectPage implements OnInit {
     }
 
     publish(version) {
-        this.api.publish(version).subscribe(res => {
-            this.toasterService.pop('success', '', 'The project is published');
+        this.api.publish(version, this.project.id).subscribe(res => {
+            this.toasterService.pop('success', '', 'The projectDetail is published');
         }, res => {
             const error = JSON.parse(res._body);
             this.toasterService.pop('error', '', (error.error && error.error.message) || 'Sorry, something is wrong');
@@ -162,8 +171,8 @@ export class ProjectPage implements OnInit {
             return;
         }
 
-        this.api.publish(version).subscribe(res => {
-            this.toasterService.pop('success', '', 'The project is published');
+        this.api.publish(version, this.project.id).subscribe(res => {
+            this.toasterService.pop('success', '', 'The projectDetail is published');
             this.versions.push(version);
             this.versionModalRef.hide();
         }, res => {

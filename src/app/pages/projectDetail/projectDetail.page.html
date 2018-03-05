@@ -1,7 +1,9 @@
 <div class="container">
   <h3 class="mt-4">
-    Manage Languages and Namespaces
-
+    <a [routerLink]="['../']">
+      <i class="fa fa-chevron-left"></i>
+    </a>
+    Project Detail - {{project.name}}
     <div class="btn-group d-inline-block ml-2">
       <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Publish
@@ -51,11 +53,11 @@
           <span class="text-primary float-right" *ngIf="key === 'en'">(Reference Lanuage)</span>
         </div>
 
-        <div *ngFor="let item of detail[key]" class="d-flex">
+        <div *ngFor="let item of detail[key]" class="d-flex namespace-item" (click)="editLanguage(key, item.namespace)">
           <span>{{item.namespace}}</span>
-          <span role="button" class="ml-auto btn-edit-language" (click)="editLanguage(key, item.namespace)" title="Edit Language">
-            <i class="fa fa-pencil"></i>
-          </span>
+          <!-- <span role="button" class="ml-auto btn-delete" (click)="deleteNamespace(key, item.namespace)">
+            <i class="fa fa-trash"></i>
+          </span> -->
         </div>
       </div>
     </div>

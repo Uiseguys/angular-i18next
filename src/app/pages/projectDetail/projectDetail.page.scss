@@ -1,4 +1,4 @@
-app-project-page {
+app-projectDetail-page {
   .btn-add {
     width: 100%;
     display: flex;
@@ -32,7 +32,10 @@ app-project-page {
     color: #333;
     background-color: #fff;
     border: 1px solid #b4b4b4;
-    padding: 1rem;
+    padding: 5px;
+    > div {
+      padding: 5px 10px;
+    }
   }
 
   .btn-edit-language {
@@ -41,4 +44,17 @@ app-project-page {
       color: blue;
     }
   }
+  .namespace-item {
+    cursor: pointer;
+    padding: 5px 10px;
+    .btn-delete {
+      display: none;
+    }
+    &:hover {
+      background: #ccc;   
+      .btn-delete { 
+        display: initial;
+      }
+    }
+  }  
 }

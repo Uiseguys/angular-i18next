@@ -1,0 +1,50 @@
+<div class="container">
+  <h3 class="my-5">
+    Projects Page
+    <button class="btn btn-sm btn-primary" (click)="showNewModal(newModalTemplate)">
+      <i class="fa fa-plus-circle"></i> Add new project</button>
+  </h3>
+
+  <div *ngIf="!projects.length" class="text-center">
+    No Projects Found
+  </div>
+  <div *ngFor="let item of projects" class="d-flex align-items-center project-item">
+    <div>
+      <a [routerLink]="['/dashboard',item.id]" class="text-primary text-underline">
+        {{item.name}}
+      </a>
+    </div>
+    <div class="ml-auto">
+      <button type="button" class="btn btn-success btn-sm" (click)="showUpdateModal(updateModalTemplate, item)">
+        <i class="fa fa-edit"></i>
+      </button>&nbsp;
+      <button type="button" class="btn btn-danger btn-sm" (click)="delete(item)">
+        <i class="fa fa-remove"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #newModalTemplate>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Add new project</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="newModalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <projectForm [isCreate]="true" (onSubmit)="create($event)"></projectForm>
+  </div>
+</ng-template>
+
+<ng-template #updateModalTemplate>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Update project</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="updateModalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <projectForm [isCreate]="false" (onSubmit)="update($event)" [initialValue]="project"></projectForm>
+  </div>
+</ng-template>

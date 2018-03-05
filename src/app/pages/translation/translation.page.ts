@@ -1,13 +1,13 @@
-import {Component, OnInit, ViewEncapsulation} from '@angular/core';
-import {Router, ActivatedRoute} from "@angular/router";
-import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
-import {Observable} from 'rxjs/Observable';
-import {ToasterService} from 'angular2-toaster';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Router, ActivatedRoute } from "@angular/router";
+import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
+import { Observable } from 'rxjs/Observable';
+import { ToasterService } from 'angular2-toaster';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import {orderBy} from 'lodash';
+import { orderBy } from 'lodash';
 
-import {TranslationService} from "./translation.service";
+import { TranslationService } from "./translation.service";
 
 @Component({
     selector: 'app-translation-page',
@@ -16,11 +16,10 @@ import {TranslationService} from "./translation.service";
     encapsulation: ViewEncapsulation.None,
 })
 export class TranslationPage implements OnInit {
-    language = 'en';
-    namespace = 'default';
-    
+    project: any = {};
+    translation: any = {};
+
     languages = [];
-    translationId = 0;
     oldResources = {}; // temp resourcfes for compare
     resources = {}; // working resources
     keys = [];
@@ -29,7 +28,7 @@ export class TranslationPage implements OnInit {
     form: FormGroup;
     keyForm: FormGroup;
     isCollapsed = true;
-    
+
     constructor(
         private fb: FormBuilder,
         private route: ActivatedRoute,
@@ -37,7 +36,7 @@ export class TranslationPage implements OnInit {
         private api: TranslationService,
         private toasterService: ToasterService,
         private modalService: BsModalService,
-    ) { 
+    ) {
         this.form = fb.group({
             'key': ['', Validators.compose([Validators.required])],
             'value': ['', Validators.compose([Validators.required])],
@@ -49,31 +48,22 @@ export class TranslationPage implements OnInit {
         });
     }
 
-    ngOnInit() {       
+    ngOnInit() {
         this.route
-        .params
-        .subscribe(params => {
-            this.language = params.language || 'en';
-            this.namespace = params.namespace || 'default';            
+            .data
+            .subscribe(({ translation }) => {
+                this.project = translation.project;
+                this.translation = translation;
+                // get Languages
+                this.api.getLanguages(translation.namespace, translation.projectId).subscribe(res => {
+                    this.languages = res.map(item => item.language);
+                });
 
-            // get Languages
-            this.api.getLanguages(this.namespace).subscribe(res => {
-                this.languages = res.map(item => item.language);
-            });
-
-            this.api.getDetail(this.language, this.namespace).subscribe(res => {
-                if (!res.length) {
-                    this.toasterService.pop('error', '', 'Page Not Found');
-                    return this.router.navigate(['/dashboard/languages']);
-                }
-
-                this.translationId = res[0].id;
-                this.resources = JSON.parse(res[0].description || '{}');
+                this.resources = JSON.parse(translation.description || '{}');
                 this.oldResources = Object.assign({}, this.resources);
                 this.keys = orderBy(Object.keys(this.resources));
                 this.isCollapsed = this.keys.length > 0;
             });
-        });
     }
 
     addEntry($event) {
@@ -84,9 +74,9 @@ export class TranslationPage implements OnInit {
         }
         if (!this.form.valid) return;
 
-        this.api.addEntry(this.translationId, this.form.value).subscribe(res => {
+        this.api.addEntry(this.translation.id, this.form.value).subscribe(res => {
             // apply changes to local variables
-            const {key, value} = this.form.value;
+            const { key, value } = this.form.value;
             this.keys.unshift(key);
             this.oldResources[key] = value;
             this.resources[key] = value;
@@ -100,7 +90,7 @@ export class TranslationPage implements OnInit {
     }
 
     updateEntry(key) {
-        this.api.updateEntry(this.translationId, {
+        this.api.updateEntry(this.translation.id, {
             key,
             value: this.resources[key],
         }).subscribe(res => {
@@ -120,14 +110,14 @@ export class TranslationPage implements OnInit {
         }
         if (!this.keyForm.valid) return;
 
-        const {key, oldKey} = this.keyForm.value;          
-        
+        const { key, oldKey } = this.keyForm.value;
+
         if (key === oldKey) {
             this.modalRef.hide();
             return;
         }
 
-        this.api.updateKey(this.translationId, this.keyForm.value).subscribe(res => {
+        this.api.updateKey(this.translation.id, this.keyForm.value).subscribe(res => {
             // apply changes to local variables
 
             this.resources[key] = this.resources[oldKey];
@@ -148,7 +138,7 @@ export class TranslationPage implements OnInit {
     }
 
     deleteEntry(key) {
-        this.api.deleteEntry(this.translationId, key).subscribe(res => {
+        this.api.deleteEntry(this.translation.id, key).subscribe(res => {
             // remove key from local variables
             this.oldResources[key] = undefined;
             this.resources[key] = undefined;
@@ -162,8 +152,8 @@ export class TranslationPage implements OnInit {
     }
 
     openKeyModal(key, template) {
-        this.keyForm.reset({ 
-            key, 
+        this.keyForm.reset({
+            key,
             oldKey: key,
         });
         this.modalRef = this.modalService.show(template);

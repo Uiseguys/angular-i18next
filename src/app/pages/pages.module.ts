@@ -1,28 +1,25 @@
 
-import { CommonModule } from '@angular/common';  
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FileUploadModule } from 'ng2-file-upload';
-import {SelectModule} from 'ng2-select';
-import {ToasterService} from 'angular2-toaster';
-import {NgxPaginationModule} from 'ngx-pagination';
-import { CollapseModule } from 'ngx-bootstrap/collapse';
-import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
-import { ModalModule } from 'ngx-bootstrap/modal';
 
-import {AuthGuardResolve} from 'services/authguard/authguard.service';
-import {ServicesModule} from 'services/services.module';
-import {LayoutModule} from 'layout/layout.module';
-import {DashboardLayoutComponent} from 'layout/dashboardlayout/dashboardlayout.component';
-import {LoginPage} from './login/login.page';
-import {RegisterPage} from './register/register.page';
+import { SharedModule } from "shared/shared.module";
+import { AuthGuardResolve } from 'services/authguard/authguard.service';
+import { ServicesModule } from 'services/services.module';
+import { LayoutModule } from 'layout/layout.module';
+import { DashboardLayoutComponent } from 'layout/dashboardlayout/dashboardlayout.component';
+import { LoginPage } from './login/login.page';
+import { RegisterPage } from './register/register.page';
 
-import {ProjectService} from './project/project.service';
-import {ProjectPage} from './project/project.page';
+import { ProjectModule } from './project/project.module';
+import { ProjectResolver } from './project/project.resolver';
+import { ProjectPage } from './project/list/project.page';
 
-import {TranslationService} from './translation/translation.service';
-import {TranslationPage} from './translation/translation.page';
+import { ProjectDetailService } from './projectDetail/projectDetail.service';
+import { ProjectDetailPage } from './projectDetail/projectDetail.page';
+
+import { TranslationService } from './translation/translation.service';
+import { TranslationResolver } from './translation/translation.resolver';
+import { TranslationPage } from './translation/translation.page';
 
 export const routes = [
     {
@@ -32,15 +29,28 @@ export const routes = [
     },
     {
         path: 'dashboard',
-        component: DashboardLayoutComponent,        
+        component: DashboardLayoutComponent,
         resolve: {
             user: AuthGuardResolve
         },
         children: [
-            { path: '', redirectTo: 'languages', pathMatch: 'full' },
-            
-            { path: 'languages', component: ProjectPage },
-            { path: 'translation/:language/:namespace', component: TranslationPage },
+            { path: '', component: ProjectPage, pathMatch: 'full' },
+
+            {
+                path: ':projectId',
+                component: ProjectDetailPage,
+                pathMatch: 'full',
+                resolve: {
+                    project: ProjectResolver
+                },
+            },
+            {
+                path: ':projectId/:language/:namespace',
+                component: TranslationPage,
+                resolve: {
+                    translation: TranslationResolver
+                },
+            },
         ]
     },
     { path: '**', redirectTo: 'login' }
@@ -50,29 +60,22 @@ export const routes = [
 
 @NgModule({
     imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        CollapseModule.forRoot(),
-        BsDropdownModule.forRoot(),
-        ModalModule.forRoot(),
-        FileUploadModule,
-        SelectModule,
-        NgxPaginationModule,
+        SharedModule,
         LayoutModule,
+        ProjectModule,
         RouterModule.forRoot(routes)
     ],
     declarations: [
-      LoginPage,
-      RegisterPage,
+        LoginPage,
+        RegisterPage,
 
-      ProjectPage,
-      TranslationPage,
+        ProjectDetailPage,
+        TranslationPage,
     ],
     providers: [
-        ToasterService,
-        ProjectService,
+        ProjectDetailService,
         TranslationService,
+        TranslationResolver,
     ],
     exports: [
         RouterModule,

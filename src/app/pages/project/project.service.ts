@@ -1,7 +1,8 @@
 /**
- * Created by S.Angel on 4/2/20${projectId}7.
+ * Created by S.Angel on 4/2/2017.
  */
 import { Injectable } from '@angular/core';
+
 import { Api } from "services/api/api.service";
 
 @Injectable()
@@ -12,35 +13,40 @@ export class ProjectService {
 
     }
 
-    getDetail(projectId = 1) {
+    // ---------- project api ----------
+    getProjectCount() {
+        return this.api.get('/Projects/count');
+    }
+
+    getDetail(id) {
+        return this.api.get(`/Projects/${id}`);
+    }
+
+    getProjects(page = 1, pageSize = 20) {
         const filter = {
-            fields: ['language', 'namespace'],
-        }
+            skip: page > 0 ? (page - 1) * pageSize : 0,
+            limit: pageSize,
+        };
 
-        return this.api.get(`/Translations?filter=${JSON.stringify(filter)}`);
+        return this.api.get(`/Projects?filter=${JSON.stringify(filter)}`);
     }
 
-    addLanguage(language, projectId = 1) {
-        return this.api.post(`/Projects/${projectId}/language`, { language });
+    createProject(info) {
+        return this.api.post('/Projects', info);
     }
 
-    removeLanguage(language, projectId = 1) {
-        return this.api.delete(`/Projects/${projectId}/language/${encodeURIComponent(language)}`);
+    updateProject(id, info) {
+        return this.api.patch(`/Projects/${id}`, info);
     }
 
-    addNamespace(namespace, projectId = 1) {
-        return this.api.post(`/Projects/${projectId}/namespace`, { namespace });
+    getProject(id) {
+        const filter = {
+        };
+
+        return this.api.get(`/Projects/${id}?filter=${JSON.stringify(filter)}`);
     }
 
-    removeNamespace(namespace, projectId = 1) {
-        return this.api.delete(`/Projects/${projectId}/namespace/${encodeURIComponent(namespace)}`);
-    }
-
-    getVersions(projectId = 1) {
-        return this.api.get(`/Projects/${projectId}/versions`);
-    }
-
-    publish(version, projectId = 1) {
-        return this.api.post(`/Projects/${projectId}/publish`, { version });
+    deleteProject(id) {
+        return this.api.delete(`/Projects/${id}`);
     }
 }
