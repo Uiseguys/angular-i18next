@@ -1,6 +1,7 @@
 
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { I18NextModule } from 'angular-i18next';
 
 import { SharedModule } from "shared/shared.module";
 import { AuthGuardResolve } from 'services/authguard/authguard.service';
@@ -63,7 +64,8 @@ export const routes = [
         SharedModule,
         LayoutModule,
         ProjectModule,
-        RouterModule.forRoot(routes)
+        RouterModule.forRoot(routes),
+        I18NextModule.forRoot(),
     ],
     declarations: [
         LoginPage,
