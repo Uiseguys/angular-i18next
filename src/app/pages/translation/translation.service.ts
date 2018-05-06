@@ -2,54 +2,66 @@
  * Created by S.Angel on 4/2/2017.
  */
 import { Injectable } from '@angular/core';
-import { Api } from "services/api/api.service";
+import { Api } from 'services/api/api.service';
 
 @Injectable()
 export class TranslationService {
-    constructor(
-        private api: Api,
-    ) {
+  constructor(private api: Api) {}
 
-    }
+  importKeys(projectId, namespace, file) {
+    const headers = new Headers({ enctype: 'multipart/form-data' });
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
 
-    getDetail(language, namespace, projectId = 1) {
-        const filter = {
-            include: ['project'],
-            where: {
-                projectId,
-                language,
-                namespace,
-            }
-        }
+    return this.api.post(
+      `/Projects/${projectId}/${namespace}/import`,
+      formData,
+      {
+        headers
+      }
+    );
+  }
 
-        return this.api.get(`/Translations?filter=${JSON.stringify(filter)}`);
-    }
+  getDetail(language, namespace, projectId = 1) {
+    const filter = {
+      include: ['project'],
+      where: {
+        projectId,
+        language,
+        namespace
+      }
+    };
 
-    getLanguages(namespace, projectId = 1) {
-        const filter = {
-            fields: { language: true },
-            where: {
-                projectId,
-                namespace,
-            }
-        }
+    return this.api.get(`/Translations?filter=${JSON.stringify(filter)}`);
+  }
 
-        return this.api.get(`/Translations?filter=${JSON.stringify(filter)}`);
-    }
+  getLanguages(namespace, projectId = 1) {
+    const filter = {
+      fields: { language: true },
+      where: {
+        projectId,
+        namespace
+      }
+    };
 
-    addEntry(translationId, detail) {
-        return this.api.post(`/Translations/${translationId}/entry`, detail);
-    }
+    return this.api.get(`/Translations?filter=${JSON.stringify(filter)}`);
+  }
 
-    updateEntry(translationId, detail) {
-        return this.api.patch(`/Translations/${translationId}/entry`, detail);
-    }
+  addEntry(translationId, detail) {
+    return this.api.post(`/Translations/${translationId}/entry`, detail);
+  }
 
-    deleteEntry(translationId, key) {
-        return this.api.delete(`/Translations/${translationId}/entry/${encodeURIComponent(key)}`);
-    }
+  updateEntry(translationId, detail) {
+    return this.api.patch(`/Translations/${translationId}/entry`, detail);
+  }
 
-    updateKey(translationId, detail) {
-        return this.api.patch(`/Translations/${translationId}/key`, detail);
-    }
+  deleteEntry(translationId, key) {
+    return this.api.delete(
+      `/Translations/${translationId}/entry/${encodeURIComponent(key)}`
+    );
+  }
+
+  updateKey(translationId, detail) {
+    return this.api.patch(`/Translations/${translationId}/key`, detail);
+  }
 }

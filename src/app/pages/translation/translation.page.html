@@ -5,7 +5,11 @@
         <i class="fa fa-chevron-left"></i>
       </a>
       {{project.name}}({{translation.language}} - {{translation.namespace}})&nbsp;
-      <button *ngIf="translation.language === 'en'" type="button" class="btn btn-primary btn-sm" (click)="isCollapsed = !isCollapsed">New Translation</button>
+      <span *ngIf="translation.language === 'en'">
+        <button type="button" class="btn btn-primary btn-sm" (click)="isCollapsed = !isCollapsed">New Translation</button>
+        <button type="button" class="btn btn-sm btn-success ml-2" (click)="selectXLIFF()">Import XLIFF</button>
+        <input type="file" name="file" id="file" class="d-none" (change)="handleXIFFSelect($event)" />
+      </span>
     </h3>
 
     <div class="float-right">
